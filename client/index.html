@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine Application</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Rule Engine Application</h1>
+    
+    <!-- Create Rule Form -->
+    <h2>Create Rule</h2>
+    <form id="create-rule-form">
+        <label for="rule-string">Rule String:</label>
+        <input type="text" id="rule-string" name="rule-string" placeholder="Enter your rule string without quotes">
+        <button id="create-rule-btn">Create Rule</button>
+    </form>
+    
+    <!-- Combine Rules Form -->
+    <h2>Combine Rules</h2>
+    <form id="combine-rules-form">
+        <label for="rule-strings">Rule Strings (comma-separated):</label>
+        <input type="text" id="rule-strings" name="rule-strings"  placeholder="Enter your rule strings without quotes">
+        <button id="combine-rules-btn">Combine Rules</button>
+    </form>
+    
+    <!-- Evaluate Rule Form -->
+    <h2>Evaluate Rule</h2>
+    <form id="evaluate-rule-form">
+        <label for="ast">AST:</label>
+        <textarea id="ast" name="ast"></textarea>
+        <label for="data">JSON Data:</label>
+        <textarea id="data" name="data"></textarea>
+        <button id="evaluate-rule-btn">Evaluate Rule</button>
+    </form>
+    
+    <div id="response"></div>
+
+    <script>
+        const createRuleForm = document.getElementById('create-rule-form');
+        const combineRulesForm = document.getElementById('combine-rules-form');
+        const evaluateRuleForm = document.getElementById('evaluate-rule-form');
+        const responseDiv = document.getElementById('response');
+    
+        function clearForm(form) {
+            form.reset(); 
+        }
+    
+        function showResult(data) {
+            responseDiv.innerText = JSON.stringify(data, null, 2);
+            responseDiv.style.border = "2px solid #4CAF50"; 
+            responseDiv.style.backgroundColor = "#f9f9f9";
+            responseDiv.style.padding = "10px";
+            responseDiv.style.marginTop = "20px";
+    
+            responseDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    
+        createRuleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const ruleString = document.getElementById('rule-string').value;
+            fetch('/api/create-rule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ruleString }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showResult(data);
+                    clearForm(createRuleForm);
+                })
+                .catch((error) => console.error(error));
+        });
+    
+        combineRulesForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const ruleStrings = document.getElementById('rule-strings').value.split(',');
+            fetch('/api/combine-rules', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ruleStrings }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showResult(data);
+                    clearForm(combineRulesForm);
+                })
+                .catch((error) => console.error(error));
+        });
+    
+        evaluateRuleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const ast = document.getElementById('ast').value;
+            const data = document.getElementById('data').value;
+            fetch('/api/evaluate-rule', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ast, data }),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    showResult(data);
+                    clearForm(evaluateRuleForm); 
+                })
+                .catch((error) => console.error(error));
+        });
+    </script>
+    
+</body>
+</html>
